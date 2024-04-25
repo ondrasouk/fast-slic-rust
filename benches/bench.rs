@@ -5,6 +5,7 @@ use fast_slic_rust::atomic_arrays::AtomicArray2D;
 use fast_slic_rust::common::{AssignSweepBy, AssignThreadingStrategy, Config};
 use fast_slic_rust::conectivity::{assign_disjoint_set, enforce_connectivity};
 use fast_slic_rust::slic::{compute_spatial_path, iterate, update, Clusters};
+use image::imageops::FilterType;
 use std::time::Duration;
 
 fn bench_lab_image_from_rgb(c: &mut Criterion) {
@@ -311,6 +312,174 @@ fn bench_slic_image(c: &mut Criterion) {
     }
 }
 
+fn bench_slic_image_qhd(c: &mut Criterion) {
+    sas::init();
+    let dimg_full = image::open("test/data/aerial.jpg").unwrap();
+    let dimg = dimg_full
+        .crop_imm(0, 0, 3840, 2160)
+        .resize(2560, 1440, FilterType::CatmullRom);
+    let img = dimg.as_rgb8().unwrap().as_raw();
+    let width = dimg.width() as usize;
+    let height = dimg.height() as usize;
+    let image = LABImage::from_srgb(img.as_slice(), width, height);
+    let mut config = Config::default();
+    config.assign_threading_strategy = AssignThreadingStrategy::SingleThread;
+    let mut clusters = Clusters::initialize_clusters(&image, &config);
+    let mut group = c.benchmark_group("SLIC iterate QHD");
+    let threading_strategies = [
+        AssignThreadingStrategy::SingleThread,
+        AssignThreadingStrategy::FineGrained,
+        AssignThreadingStrategy::CoreDistributed,
+        AssignThreadingStrategy::RowBased,
+        AssignThreadingStrategy::RowBasedFusedUpdate,
+    ];
+    let subsample_strides = 1..6;
+    for threading_strategy in threading_strategies {
+        for subsample_stride in subsample_strides.clone() {
+            group.bench_with_input(
+                BenchmarkId::new(
+                    "bench_slic_image",
+                    format!("{:?}-stride={:?}", threading_strategy, subsample_stride),
+                ),
+                &(threading_strategy, subsample_stride),
+                |b, &(threading_strategy, subsample_stride)| {
+                    config.subsample_stride = subsample_stride;
+                    config.assign_threading_strategy = threading_strategy;
+                    b.iter(|| {
+                        let _ = black_box(iterate(&image, &config, &mut clusters));
+                    });
+                },
+            );
+        }
+    }
+}
+
+fn bench_slic_image_fhd(c: &mut Criterion) {
+    sas::init();
+    let dimg_full = image::open("test/data/aerial.jpg").unwrap();
+    let dimg = dimg_full
+        .crop_imm(0, 0, 3840, 2160)
+        .resize(1920, 1080, FilterType::CatmullRom);
+    let img = dimg.as_rgb8().unwrap().as_raw();
+    let width = dimg.width() as usize;
+    let height = dimg.height() as usize;
+    let image = LABImage::from_srgb(img.as_slice(), width, height);
+    let mut config = Config::default();
+    config.assign_threading_strategy = AssignThreadingStrategy::SingleThread;
+    let mut clusters = Clusters::initialize_clusters(&image, &config);
+    let mut group = c.benchmark_group("SLIC iterate FHD");
+    let threading_strategies = [
+        AssignThreadingStrategy::SingleThread,
+        AssignThreadingStrategy::FineGrained,
+        AssignThreadingStrategy::CoreDistributed,
+        AssignThreadingStrategy::RowBased,
+        AssignThreadingStrategy::RowBasedFusedUpdate,
+    ];
+    let subsample_strides = 1..6;
+    for threading_strategy in threading_strategies {
+        for subsample_stride in subsample_strides.clone() {
+            group.bench_with_input(
+                BenchmarkId::new(
+                    "bench_slic_image",
+                    format!("{:?}-stride={:?}", threading_strategy, subsample_stride),
+                ),
+                &(threading_strategy, subsample_stride),
+                |b, &(threading_strategy, subsample_stride)| {
+                    config.subsample_stride = subsample_stride;
+                    config.assign_threading_strategy = threading_strategy;
+                    b.iter(|| {
+                        let _ = black_box(iterate(&image, &config, &mut clusters));
+                    });
+                },
+            );
+        }
+    }
+}
+
+fn bench_slic_image_hd(c: &mut Criterion) {
+    sas::init();
+    let dimg_full = image::open("test/data/aerial.jpg").unwrap();
+    let dimg = dimg_full
+        .crop_imm(0, 0, 3840, 2160)
+        .resize(1280, 720, FilterType::CatmullRom);
+    let img = dimg.as_rgb8().unwrap().as_raw();
+    let width = dimg.width() as usize;
+    let height = dimg.height() as usize;
+    let image = LABImage::from_srgb(img.as_slice(), width, height);
+    let mut config = Config::default();
+    config.assign_threading_strategy = AssignThreadingStrategy::SingleThread;
+    let mut clusters = Clusters::initialize_clusters(&image, &config);
+    let mut group = c.benchmark_group("SLIC iterate HD");
+    let threading_strategies = [
+        AssignThreadingStrategy::SingleThread,
+        AssignThreadingStrategy::FineGrained,
+        AssignThreadingStrategy::CoreDistributed,
+        AssignThreadingStrategy::RowBased,
+        AssignThreadingStrategy::RowBasedFusedUpdate,
+    ];
+    let subsample_strides = 1..6;
+    for threading_strategy in threading_strategies {
+        for subsample_stride in subsample_strides.clone() {
+            group.bench_with_input(
+                BenchmarkId::new(
+                    "bench_slic_image",
+                    format!("{:?}-stride={:?}", threading_strategy, subsample_stride),
+                ),
+                &(threading_strategy, subsample_stride),
+                |b, &(threading_strategy, subsample_stride)| {
+                    config.subsample_stride = subsample_stride;
+                    config.assign_threading_strategy = threading_strategy;
+                    b.iter(|| {
+                        let _ = black_box(iterate(&image, &config, &mut clusters));
+                    });
+                },
+            );
+        }
+    }
+}
+
+fn bench_slic_image_sd(c: &mut Criterion) {
+    sas::init();
+    let dimg_full = image::open("test/data/aerial.jpg").unwrap();
+    let dimg = dimg_full
+        .crop_imm(0, 0, 3840, 2160)
+        .resize(960, 540, FilterType::CatmullRom);
+    let img = dimg.as_rgb8().unwrap().as_raw();
+    let width = dimg.width() as usize;
+    let height = dimg.height() as usize;
+    let image = LABImage::from_srgb(img.as_slice(), width, height);
+    let mut config = Config::default();
+    config.assign_threading_strategy = AssignThreadingStrategy::SingleThread;
+    let mut clusters = Clusters::initialize_clusters(&image, &config);
+    let mut group = c.benchmark_group("SLIC iterate SD");
+    let threading_strategies = [
+        AssignThreadingStrategy::SingleThread,
+        AssignThreadingStrategy::FineGrained,
+        AssignThreadingStrategy::CoreDistributed,
+        AssignThreadingStrategy::RowBased,
+        AssignThreadingStrategy::RowBasedFusedUpdate,
+    ];
+    let subsample_strides = 1..6;
+    for threading_strategy in threading_strategies {
+        for subsample_stride in subsample_strides.clone() {
+            group.bench_with_input(
+                BenchmarkId::new(
+                    "bench_slic_image",
+                    format!("{:?}-stride={:?}", threading_strategy, subsample_stride),
+                ),
+                &(threading_strategy, subsample_stride),
+                |b, &(threading_strategy, subsample_stride)| {
+                    config.subsample_stride = subsample_stride;
+                    config.assign_threading_strategy = threading_strategy;
+                    b.iter(|| {
+                        let _ = black_box(iterate(&image, &config, &mut clusters));
+                    });
+                },
+            );
+        }
+    }
+}
+
 criterion_group!(name = benches;
 config = Criterion::default().measurement_time(Duration::from_secs(30)).warm_up_time(Duration::from_secs(10));
 targets = bench_lab_image_from_rgb);
@@ -331,5 +500,5 @@ config = Criterion::default().measurement_time(Duration::from_secs(30)).warm_up_
 targets = bench_disjoint_set_flatten);
 criterion_group!(name = benches6;
 config = Criterion::default().measurement_time(Duration::from_secs(30)).warm_up_time(Duration::from_secs(10));
-targets = bench_slic_image);
+targets = bench_slic_image, bench_slic_image_qhd, bench_slic_image_fhd, bench_slic_image_hd, bench_slic_image_sd);
 criterion_main!(benches, benches1, benches2, benches3, benches4, benches5, benches6);
