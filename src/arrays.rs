@@ -341,6 +341,38 @@ impl LABImage {
         }
     }
 
+    pub fn from_raw_slice(lab_data: &[u8], width: usize, height: usize) -> Self {
+        assert!(width > 0);
+        assert!(height > 0);
+        assert_eq!(lab_data.len(), width * height * 4);
+
+        let lab_output = AVec::from_slice(ALIGN, lab_data);
+
+        Self {
+            width,
+            height,
+            lab_data: lab_output,
+        }
+    }
+
+    pub fn from_iter<I>(lab_iter: I, width: usize, height: usize) -> Self
+    where
+        I: IntoIterator<Item = u8>,
+    {
+        assert!(width > 0);
+        assert!(height > 0);
+
+        let lab_output = AVec::from_iter(ALIGN, lab_iter);
+
+        assert_eq!(lab_output.len(), width * height * 4);
+
+        Self {
+            width,
+            height,
+            lab_data: lab_output,
+        }
+    }
+
     #[inline(always)]
     pub fn get_row(&self, row: usize) -> &[u8] {
         debug_assert!(row < self.height);
@@ -383,6 +415,22 @@ mod tests {
         let width = dimg.width() as usize;
         let height = dimg.height() as usize;
         let conv_img = LABImage::from_srgb(img.as_slice(), width, height);
+        for i in 0..conv_img.lab_data.len() / 4 {
+            assert_eq!(conv_img.lab_data[3 + i * 4], 0);
+        }
+    }
+
+    #[test]
+    fn srgb_to_cielab_iter_test() {
+        let dimg = image::open("test/data/aerial.jpg").unwrap();
+        let img = dimg.as_rgb8().unwrap().as_raw();
+        let width = dimg.width() as usize;
+        let height = dimg.height() as usize;
+        let convert_iter = img.chunks_exact(3).flat_map(|p| {
+            let lab = crate::cielab::srgb_to_cielab_pixel(p);
+            [lab[0], lab[1], lab[2], 0]
+        });
+        let conv_img = LABImage::from_iter(convert_iter, width, height);
         for i in 0..conv_img.lab_data.len() / 4 {
             assert_eq!(conv_img.lab_data[3 + i * 4], 0);
         }
