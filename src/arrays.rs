@@ -25,6 +25,8 @@ impl Display for Error {
         }
     }
 }
+
+#[derive(Debug)]
 pub struct Array2D<T> {
     pub data: AVec<T, ConstAlign<ALIGN>>,
     pub width: usize,
