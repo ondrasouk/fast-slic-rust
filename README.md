@@ -88,14 +88,14 @@ This crate has also benchmarks and tests. It’s strongly recommended to use thi
 - There may be some not so perfect things. The worst is possibility of rayon deadlocking, because using `std:sync::Barrier` as a mean of synchronization. I don’t have time now for researching alternatives or doing huge rewrites. One way of avoiding this can be creating new thread pool for this crate. Discussion or PR about this is welcome.
 - Also, there may be changes in API. It’s possible, that I find some better alternative to arrays or atomic_arrays which I made for this crate.
 - There may be problems in builds for non-x86 platforms.
-- I will do more work on this in June. One of my TODOs is releasing this crate on crates.io.
 
 ## Licence
 
 This work is licenced under MIT licence.
 
-This is part of my diploma thesis (written in Czech) and I'm not sure about any English publication.
-So the citation is for now TBD.
+This is part of my diploma thesis (written in Czech) which can be accessed here https://www.vut.cz/studenti/zav-prace/detail/159072. It's only one part of my diploma thesis.
+
+It is very likely that there will be a publication in English, but for now you can cite my diploma thesis.
 
 Image `tests/data/aerial.jpg` is frame number 986 from Netflix Aerial video sequence, which is licenced by https://creativecommons.org/licenses/by-nc-nd/4.0/.
 
